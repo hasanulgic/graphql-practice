@@ -33,7 +33,6 @@ model User {
 model Profile {
   id Int @id @default(autoincrement())
   bio String
-  password String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId Int @unique
