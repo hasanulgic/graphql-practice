@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import { jwtHelper } from "../../utils/jwtHelper";
 import config from "../../config";
-
 interface userInfo {
   name: string;
   email: string;

@@ -29,7 +29,6 @@ export const postResolvers = {
     };
   },
   updatePost: async (parent: any, args: any, {prisma, userInfo}: any) => {
-    // console.log("args-->" , args, "userInfo", userInfo)
     if(!userInfo){
       return {
         postError: "UnAuthorized",
