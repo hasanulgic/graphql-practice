@@ -1,6 +1,7 @@
+import { checkUserAccess } from "../../utils/checkUserAccess";
 
 export const postResolvers = {
-  addPost: async (parent: any, {post}: any, { prisma, userInfo }: any) => {
+  addPost: async (parent: any, { post }: any, { prisma, userInfo }: any) => {
     console.log(userInfo);
     if (!userInfo) {
       return {
@@ -28,57 +29,55 @@ export const postResolvers = {
       post: newPost,
     };
   },
-  updatePost: async (parent: any, args: any, {prisma, userInfo}: any) => {
-    if(!userInfo){
+  updatePost: async (parent: any, args: any, { prisma, userInfo }: any) => {
+    if (!userInfo) {
       return {
         postError: "UnAuthorized",
-        post: null
-      }
-    }
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: userInfo.userId
-      }
-    })
-
-    if(!user) {
-      return {
-        postError: "User not found",
         post: null,
       };
     }
 
-    const post = await prisma.post.findUnique({
-      where: {
-        id: Number(args.postId)
-      }
-    })
+    const error = await checkUserAccess(prisma, userInfo.userId, args.postId);
 
-    if(!post) {
-      return {
-        postError: "post not found",
-        post: null
-      }
-    }
-    
-    if(post.authorId !== user.id){
-      return {
-        postError: "Post not owned by user",
-        post: null,
-      };
+    if (error) {
+      return error;
     }
 
     const updatedPost = await prisma.post.update({
       where: {
         id: Number(args.postId),
       },
-      data: args.post
+      data: args.post,
     });
 
     return {
       postError: "null",
-      post: updatedPost
+      post: updatedPost,
+    };
+  },
+  deletePost: async (parent: any, args: any, { prisma, userInfo }: any) => {
+    if (!userInfo) {
+      return {
+        postError: "UnAuthorized",
+        post: null,
+      };
     }
-  }
+
+    const error = await checkUserAccess(prisma, userInfo.userId, args.postId);
+
+    if (error) {
+      return error;
+    }
+
+    const deletedPost = await prisma.post.delete({
+      where: {
+        id: Number(args.postId),
+      }
+    });
+
+    return {
+      postError: "null",
+      post: deletedPost,
+    };
+  },
 };
